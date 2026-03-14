@@ -47,7 +47,7 @@
 
   /* ── Error ── */
   #error-box { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; text-align: center; }
-  .error-icon { font-size: 3rem; }
+  .error-icon { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
   #error-box h2 { font-size: 1.4rem; color: var(--accent-red); }
   #error-msg { color: var(--muted); max-width: 360px; line-height: 1.6; }
   .try-again-btn {
@@ -70,7 +70,7 @@
     width: 52px; height: 52px;
     background: linear-gradient(135deg, #22c55e, #16a34a);
     border-radius: 16px; display: flex; align-items: center;
-    justify-content: center; font-size: 1.6rem;
+    justify-content: center;
     box-shadow: 0 0 32px rgba(34,197,94,0.25);
   }
   .search-logo-text { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; }
@@ -110,7 +110,7 @@
   /* ── Top bar ── */
   .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
   .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
   .logo-text { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
   .logo-text span { color: var(--accent-green); }
   .passport-label { font-size: 0.72rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; font-weight: 500; }
@@ -146,7 +146,7 @@
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; transition: border-color 0.2s; }
   .card:hover { border-color: #2a2a40; }
   .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-  .card-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
+  .card-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .card-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
   .data-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
   .data-row:last-child { border-bottom: none; }
@@ -178,7 +178,12 @@
   <!-- Search Screen -->
   <div id="search-screen">
     <div class="search-logo">
-      <div class="search-logo-icon">⚡</div>
+      <div class="search-logo-icon">
+        <!-- Lightning bolt / battery icon -->
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 2L4.09 12.96H11L10 22L20.09 11H13L13 2Z" fill="#000" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/>
+        </svg>
+      </div>
       <div class="search-logo-text">Nex<span>cell</span></div>
     </div>
     <p class="search-tagline">Digital Battery Passport System<br/>Enter a Battery ID or scan a QR code to view its passport</p>
@@ -201,7 +206,15 @@
 
   <!-- Error -->
   <div id="error-box">
-    <div class="error-icon">🔋</div>
+    <div class="error-icon">
+      <!-- Battery with X icon -->
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="14" width="38" height="28" rx="4" stroke="#ef4444" stroke-width="2.2" fill="none"/>
+        <rect x="44" y="21" width="6" height="14" rx="2" stroke="#ef4444" stroke-width="2" fill="none"/>
+        <line x1="16" y1="22" x2="34" y2="34" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="34" y1="22" x2="16" y2="34" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
     <h2>Battery Not Found</h2>
     <p id="error-msg">This battery ID does not exist in the Nexcell database.</p>
     <button class="try-again-btn" onclick="goBack()">← Try Another ID</button>
@@ -211,7 +224,12 @@
   <div id="passport">
     <div class="topbar">
       <div class="logo" onclick="goBack()">
-        <div class="logo-icon">⚡</div>
+        <div class="logo-icon">
+          <!-- Small lightning bolt -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L4.09 12.96H11L10 22L20.09 11H13L13 2Z" fill="#000" stroke="#000" stroke-width="1" stroke-linejoin="round"/>
+          </svg>
+        </div>
         <div class="logo-text">Nex<span>cell</span></div>
       </div>
       <div style="display:flex; align-items:center; gap:12px;">
@@ -242,7 +260,12 @@
     <div class="cards-grid">
       <div class="card">
         <div class="card-header">
-          <div class="card-icon" style="background:rgba(34,197,94,0.12);">📊</div>
+          <div class="card-icon" style="background:rgba(34,197,94,0.12);">
+            <!-- Activity / health waveform icon -->
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polyline points="2,12 6,12 8,5 10,19 12,9 14,15 16,12 22,12" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </div>
           <div class="card-title">Health Analysis</div>
         </div>
         <div class="soh-bars">
@@ -263,7 +286,15 @@
 
       <div class="card">
         <div class="card-header">
-          <div class="card-icon" style="background:rgba(59,130,246,0.12);">⚡</div>
+          <div class="card-icon" style="background:rgba(59,130,246,0.12);">
+            <!-- EIS / impedance spectroscopy icon: sine wave through a circuit -->
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="3" stroke="#3b82f6" stroke-width="2" fill="none"/>
+              <path d="M2 12 L6 12 M18 12 L22 12" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6 12 Q7.5 6 9 12 Q10.5 18 12 12" stroke="#3b82f6" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+              <path d="M12 12 Q13.5 6 15 12 Q16.5 18 18 12" stroke="#3b82f6" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
           <div class="card-title">EIS Readings</div>
         </div>
         <div class="data-row"><span class="data-label">Ambient Temp</span><span class="data-value" id="ambient-temp">—</span></div>
@@ -276,8 +307,23 @@
 
       <div class="card card-full">
         <div class="card-header">
-          <div class="card-icon" style="background:rgba(250,204,21,0.1);">🏷️</div>
-          <div class="card-title">Battery Identity & Traceability</div>
+          <div class="card-icon" style="background:rgba(250,204,21,0.10);">
+            <!-- Traceability / QR / fingerprint icon -->
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="7" height="7" rx="1" stroke="#facc15" stroke-width="2" fill="none"/>
+              <rect x="14" y="3" width="7" height="7" rx="1" stroke="#facc15" stroke-width="2" fill="none"/>
+              <rect x="3" y="14" width="7" height="7" rx="1" stroke="#facc15" stroke-width="2" fill="none"/>
+              <rect x="5" y="5" width="3" height="3" rx="0.5" fill="#facc15"/>
+              <rect x="16" y="5" width="3" height="3" rx="0.5" fill="#facc15"/>
+              <rect x="5" y="16" width="3" height="3" rx="0.5" fill="#facc15"/>
+              <line x1="14" y1="14" x2="14" y2="14" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
+              <line x1="14" y1="17" x2="14" y2="21" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
+              <line x1="17" y1="14" x2="21" y2="14" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
+              <line x1="17" y1="21" x2="21" y2="21" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
+              <line x1="21" y1="17" x2="21" y2="21" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="card-title">Battery Identity &amp; Traceability</div>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 32px;">
           <div>
@@ -325,7 +371,6 @@
     window.history.pushState({}, '', '/');
   }
 
-  // Enter key support
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('search-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleSearch();
@@ -439,7 +484,6 @@
     setText('tested-at', d.created_at ? new Date(d.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—');
   }
 
-  // ── On page load: check if QR scan (URL has battery ID) ──
   const pathParts = window.location.pathname.split('/').filter(Boolean);
   if (pathParts.length >= 2 && pathParts[0] === 'battery') {
     loadBattery(pathParts[1]);

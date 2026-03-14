@@ -28,150 +28,130 @@
     overflow-x: hidden;
   }
 
-  /* ── Animated background ── */
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background:
       radial-gradient(ellipse 80% 50% at 20% 10%, rgba(34,197,94,0.06) 0%, transparent 60%),
       radial-gradient(ellipse 60% 40% at 80% 80%, rgba(250,204,21,0.05) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; z-index: 0;
   }
 
   .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
 
   /* ── Loader ── */
-  #loader {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 80vh; gap: 20px;
-  }
-  .spinner {
-    width: 48px; height: 48px;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent-green);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
+  #loader { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; gap: 20px; }
+  .spinner { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent-green); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   #loader p { color: var(--muted); font-size: 0.9rem; }
 
   /* ── Error ── */
-  #error-box {
-    display: none; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 80vh; gap: 16px; text-align: center;
-  }
+  #error-box { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; text-align: center; }
   .error-icon { font-size: 3rem; }
   #error-box h2 { font-size: 1.4rem; color: var(--accent-red); }
   #error-msg { color: var(--muted); max-width: 360px; line-height: 1.6; }
+  .try-again-btn {
+    margin-top: 8px; padding: 10px 28px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text); border-radius: 10px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 0.9rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .try-again-btn:hover { border-color: var(--accent-green); background: rgba(34,197,94,0.06); }
 
-  /* ── Passport (hidden until loaded) ── */
+  /* ── Search Screen ── */
+  #search-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 90vh; gap: 0;
+    animation: fadeUp 0.5s ease;
+  }
+  .search-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .search-logo-icon {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-radius: 16px; display: flex; align-items: center;
+    justify-content: center; font-size: 1.6rem;
+    box-shadow: 0 0 32px rgba(34,197,94,0.25);
+  }
+  .search-logo-text { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; }
+  .search-logo-text span { color: var(--accent-green); }
+  .search-tagline { color: var(--muted); font-size: 0.95rem; margin-bottom: 44px; text-align: center; line-height: 1.6; }
+  .search-box {
+    width: 100%; max-width: 480px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 28px 28px 24px;
+  }
+  .search-box label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 10px; }
+  .search-input-row { display: flex; gap: 10px; }
+  .search-input {
+    flex: 1; padding: 12px 16px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 0.95rem;
+    outline: none; transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent-green); }
+  .search-input::placeholder { color: var(--muted); }
+  .search-btn {
+    padding: 12px 22px;
+    background: var(--accent-green); color: #000;
+    border: none; border-radius: 10px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 0.95rem;
+    font-weight: 700; transition: background 0.2s; white-space: nowrap;
+  }
+  .search-btn:hover { background: #16a34a; }
+  .search-hint { margin-top: 14px; font-size: 0.78rem; color: var(--muted); text-align: center; }
+  .search-error { margin-top: 12px; color: var(--accent-red); font-size: 0.82rem; display: none; }
+
+  /* ── Passport ── */
   #passport { display: none; animation: fadeUp 0.5s ease; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ── Top nav bar ── */
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 36px;
-  }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-icon {
-    width: 36px; height: 36px; background: linear-gradient(135deg, #22c55e, #16a34a);
-    border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
-  }
+  /* ── Top bar ── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
+  .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
   .logo-text { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
   .logo-text span { color: var(--accent-green); }
-  .passport-label {
-    font-size: 0.72rem; letter-spacing: 0.12em; color: var(--muted);
-    text-transform: uppercase; font-weight: 500;
+  .passport-label { font-size: 0.72rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; font-weight: 500; }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); padding: 6px 14px; border-radius: 8px;
+    cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.8rem;
+    transition: border-color 0.2s, color 0.2s;
   }
+  .back-btn:hover { border-color: var(--accent-green); color: var(--text); }
 
   /* ── Hero ── */
-  .hero {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-    margin-bottom: 20px;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 24px;
-    align-items: center;
-  }
-  .hero-left {}
-  .hero-tag {
-    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em;
-    text-transform: uppercase; color: var(--accent-green);
-    margin-bottom: 8px;
-  }
-  .hero-battery-id {
-    font-size: 2rem; font-weight: 800; letter-spacing: -0.03em;
-    line-height: 1.1; margin-bottom: 8px;
-  }
+  .hero { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
+  .hero-tag { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-green); margin-bottom: 8px; }
+  .hero-battery-id { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 8px; }
   .hero-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-  .meta-chip {
-    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-    border-radius: 999px; padding: 4px 12px; font-size: 0.78rem; color: var(--muted);
-  }
+  .meta-chip { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 0.78rem; color: var(--muted); }
   .meta-chip strong { color: var(--text); font-weight: 500; }
-  .status-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    border: 1px solid; border-radius: 999px;
-    padding: 6px 16px; font-size: 0.8rem; font-weight: 600;
-    margin-top: 16px;
-  }
+  .status-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid; border-radius: 999px; padding: 6px 16px; font-size: 0.8rem; font-weight: 600; margin-top: 16px; }
   .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
-  /* ── SOH Gauge ── */
+  /* ── Gauge ── */
   .gauge-wrap { text-align: center; }
   canvas#gauge-canvas { display: block; margin: 0 auto; }
   .gauge-center { margin-top: -28px; }
   .gauge-value { font-size: 2rem; font-weight: 800; line-height: 1; }
   .gauge-sub { font-size: 0.7rem; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
 
-  /* ── Grid cards ── */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 16px;
-  }
+  /* ── Cards ── */
+  .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
   .card-full { grid-column: 1 / -1; }
-
-  /* ── Card ── */
-  .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 22px; 
-    transition: border-color 0.2s;
-  }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; transition: border-color 0.2s; }
   .card:hover { border-color: #2a2a40; }
-  .card-header {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 18px;
-  }
-  .card-icon {
-    width: 32px; height: 32px; border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.95rem; flex-shrink: 0;
-  }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .card-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink: 0; }
   .card-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-
-  /* ── Data rows ── */
-  .data-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 9px 0; border-bottom: 1px solid var(--border);
-    font-size: 0.875rem;
-  }
+  .data-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
   .data-row:last-child { border-bottom: none; }
   .data-label { color: var(--muted); flex-shrink: 0; }
   .data-value { font-weight: 500; text-align: right; max-width: 55%; word-break: break-all; }
-
-  /* ── SOH breakdown bar ── */
   .soh-bars { display: flex; flex-direction: column; gap: 14px; }
   .soh-bar-item label { font-size: 0.8rem; color: var(--muted); display: flex; justify-content: space-between; margin-bottom: 6px; }
   .soh-bar-item label span { font-weight: 600; color: var(--text); }
@@ -188,11 +168,30 @@
     .gauge-wrap { display: none; }
     .cards-grid { grid-template-columns: 1fr; }
     .hero-battery-id { font-size: 1.5rem; }
+    .search-box { padding: 22px 18px; }
   }
 </style>
 </head>
 <body>
 <div class="page">
+
+  <!-- Search Screen -->
+  <div id="search-screen">
+    <div class="search-logo">
+      <div class="search-logo-icon">⚡</div>
+      <div class="search-logo-text">Nex<span>cell</span></div>
+    </div>
+    <p class="search-tagline">Digital Battery Passport System<br/>Enter a Battery ID or scan a QR code to view its passport</p>
+    <div class="search-box">
+      <label>Battery ID</label>
+      <div class="search-input-row">
+        <input class="search-input" id="search-input" type="text" placeholder="e.g. NCL-2026-0042" autocomplete="off" spellcheck="false"/>
+        <button class="search-btn" onclick="handleSearch()">Look Up →</button>
+      </div>
+      <div class="search-error" id="search-error">⚠ Please enter a Battery ID</div>
+      <div class="search-hint">You can also scan any Nexcell QR code to go directly to a battery passport</div>
+    </div>
+  </div>
 
   <!-- Loader -->
   <div id="loader">
@@ -205,21 +204,22 @@
     <div class="error-icon">🔋</div>
     <h2>Battery Not Found</h2>
     <p id="error-msg">This battery ID does not exist in the Nexcell database.</p>
+    <button class="try-again-btn" onclick="goBack()">← Try Another ID</button>
   </div>
 
   <!-- Passport -->
   <div id="passport">
-
-    <!-- Top bar -->
     <div class="topbar">
-      <div class="logo">
+      <div class="logo" onclick="goBack()">
         <div class="logo-icon">⚡</div>
         <div class="logo-text">Nex<span>cell</span></div>
       </div>
-      <div class="passport-label">Digital Battery Passport</div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="passport-label">Digital Battery Passport</div>
+        <button class="back-btn" onclick="goBack()">← Search</button>
+      </div>
     </div>
 
-    <!-- Hero -->
     <div class="hero">
       <div class="hero-left">
         <div class="hero-tag">Battery Passport</div>
@@ -239,10 +239,7 @@
       </div>
     </div>
 
-    <!-- SOH Breakdown + EIS Readings -->
     <div class="cards-grid">
-
-      <!-- SOH Breakdown -->
       <div class="card">
         <div class="card-header">
           <div class="card-icon" style="background:rgba(34,197,94,0.12);">📊</div>
@@ -259,50 +256,24 @@
           </div>
         </div>
         <div style="margin-top: 20px;">
-          <div class="data-row">
-            <span class="data-label">Predicted Re</span>
-            <span class="data-value" id="predicted-re">—</span>
-          </div>
-          <div class="data-row">
-            <span class="data-label">Predicted Rct</span>
-            <span class="data-value" id="predicted-rct">—</span>
-          </div>
+          <div class="data-row"><span class="data-label">Predicted Re</span><span class="data-value" id="predicted-re">—</span></div>
+          <div class="data-row"><span class="data-label">Predicted Rct</span><span class="data-value" id="predicted-rct">—</span></div>
         </div>
       </div>
 
-      <!-- EIS Readings -->
       <div class="card">
         <div class="card-header">
           <div class="card-icon" style="background:rgba(59,130,246,0.12);">⚡</div>
           <div class="card-title">EIS Readings</div>
         </div>
-        <div class="data-row">
-          <span class="data-label">Ambient Temp</span>
-          <span class="data-value" id="ambient-temp">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">Sense Current</span>
-          <span class="data-value" id="sense-current">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">Battery Current</span>
-          <span class="data-value" id="battery-current">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">Current Ratio</span>
-          <span class="data-value" id="current-ratio">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">Battery Impedance</span>
-          <span class="data-value" id="battery-impedance">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">Rectified Impedance</span>
-          <span class="data-value" id="rectified-impedance">—</span>
-        </div>
+        <div class="data-row"><span class="data-label">Ambient Temp</span><span class="data-value" id="ambient-temp">—</span></div>
+        <div class="data-row"><span class="data-label">Sense Current</span><span class="data-value" id="sense-current">—</span></div>
+        <div class="data-row"><span class="data-label">Battery Current</span><span class="data-value" id="battery-current">—</span></div>
+        <div class="data-row"><span class="data-label">Current Ratio</span><span class="data-value" id="current-ratio">—</span></div>
+        <div class="data-row"><span class="data-label">Battery Impedance</span><span class="data-value" id="battery-impedance">—</span></div>
+        <div class="data-row"><span class="data-label">Rectified Impedance</span><span class="data-value" id="rectified-impedance">—</span></div>
       </div>
 
-      <!-- Identity full width -->
       <div class="card card-full">
         <div class="card-header">
           <div class="card-icon" style="background:rgba(250,204,21,0.1);">🏷️</div>
@@ -310,56 +281,67 @@
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 32px;">
           <div>
-            <div class="data-row">
-              <span class="data-label">Serial Number</span>
-              <span class="data-value" id="serial-number">—</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Batch ID</span>
-              <span class="data-value" id="batch-id">—</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Weight</span>
-              <span class="data-value" id="weight">—</span>
-            </div>
+            <div class="data-row"><span class="data-label">Serial Number</span><span class="data-value" id="serial-number">—</span></div>
+            <div class="data-row"><span class="data-label">Batch ID</span><span class="data-value" id="batch-id">—</span></div>
+            <div class="data-row"><span class="data-label">Weight</span><span class="data-value" id="weight">—</span></div>
           </div>
           <div>
-            <div class="data-row">
-              <span class="data-label">Date of Manufacture</span>
-              <span class="data-value" id="manufacture-date">—</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Place of Manufacture</span>
-              <span class="data-value" id="manufacture-place">—</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Last Tested</span>
-              <span class="data-value" id="tested-at">—</span>
-            </div>
+            <div class="data-row"><span class="data-label">Date of Manufacture</span><span class="data-value" id="manufacture-date">—</span></div>
+            <div class="data-row"><span class="data-label">Place of Manufacture</span><span class="data-value" id="manufacture-place">—</span></div>
+            <div class="data-row"><span class="data-label">Last Tested</span><span class="data-value" id="tested-at">—</span></div>
           </div>
         </div>
       </div>
-
     </div>
 
     <div class="footer">
       Powered by <strong>Nexcell EIS Intelligence</strong> · Digital Battery Passport<br/>
       This report is generated using Electrochemical Impedance Spectroscopy (EIS) analysis
     </div>
+  </div>
 
-  </div><!-- /passport -->
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = 'https://qedtgxkyfmjbqrgmgvcy.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZHRneGt5Zm1qYnFyZ21ndmN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NjAwNzMsImV4cCI6MjA4OTAzNjA3M30.SApfuEOgjc3c9K6q7JDmGhZTldVCQ407URjf02gzhoY';
-
+  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+  const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
   const { createClient } = supabase;
   const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  const pathParts = window.location.pathname.split('/').filter(Boolean);
-  const batteryId = pathParts[pathParts.length - 1];
+  function show(id, displayType = 'flex') {
+    document.getElementById(id).style.display = displayType;
+  }
+  function hide(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  function goBack() {
+    hide('passport');
+    hide('error-box');
+    hide('loader');
+    show('search-screen', 'flex');
+    document.getElementById('search-input').value = '';
+    window.history.pushState({}, '', '/');
+  }
+
+  // Enter key support
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('search-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+  });
+
+  function handleSearch() {
+    const val = document.getElementById('search-input').value.trim();
+    const errEl = document.getElementById('search-error');
+    if (!val) {
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    loadBattery(val);
+  }
 
   function getStatusStyle(soh) {
     if (soh >= 85) return { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' };
@@ -372,20 +354,12 @@
     const ctx = canvas.getContext('2d');
     const cx = canvas.width / 2, cy = canvas.height * 0.78, r = 72;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Track
     ctx.beginPath();
     ctx.arc(cx, cy, r, Math.PI, 0);
-    ctx.lineWidth = 14; ctx.strokeStyle = '#1e1e30'; ctx.lineCap = 'round';
-    ctx.stroke();
-
-    // Fill
+    ctx.lineWidth = 14; ctx.strokeStyle = '#1e1e30'; ctx.lineCap = 'round'; ctx.stroke();
     ctx.beginPath();
     ctx.arc(cx, cy, r, Math.PI, Math.PI + Math.PI * value / 100);
-    ctx.lineWidth = 14; ctx.strokeStyle = color; ctx.lineCap = 'round';
-    ctx.stroke();
-
-    // Glow
+    ctx.lineWidth = 14; ctx.strokeStyle = color; ctx.lineCap = 'round'; ctx.stroke();
     ctx.shadowColor = color; ctx.shadowBlur = 12;
     ctx.beginPath();
     ctx.arc(cx, cy, r, Math.PI, Math.PI + Math.PI * value / 100);
@@ -398,32 +372,34 @@
     if (el) el.textContent = val;
   }
 
-  async function loadBattery() {
-    if (!batteryId || batteryId === 'battery' || pathParts.length === 0) {
-      showError('No battery ID found in URL. Scan a valid Nexcell QR code.');
-      return;
-    }
+  async function loadBattery(batteryId) {
+    hide('search-screen');
+    hide('error-box');
+    hide('passport');
+    show('loader', 'flex');
 
     try {
       const { data, error } = await db
         .from('batteries').select('*')
         .eq('battery_id', batteryId).single();
 
+      hide('loader');
       if (error || !data) {
-        showError(`No record found for battery ID "${batteryId}". Make sure the QR was scanned correctly.`);
+        show('error-box', 'flex');
+        setText('error-msg', `No record found for battery ID "${batteryId}". Please check and try again.`);
         return;
       }
       renderPassport(data);
     } catch (e) {
-      showError('Network error. Please check your connection and try again.');
+      hide('loader');
+      show('error-box', 'flex');
+      setText('error-msg', 'Network error. Please check your connection and try again.');
     }
   }
 
   function renderPassport(d) {
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('passport').style.display = 'block';
+    show('passport', 'block');
     document.title = `Nexcell Passport — ${d.battery_id}`;
-
     const s = getStatusStyle(d.average_soh);
 
     setText('battery-id', d.battery_id);
@@ -449,29 +425,25 @@
 
     setText('predicted-re',  d.predicted_re  != null ? d.predicted_re  + ' Ω' : '—');
     setText('predicted-rct', d.predicted_rct != null ? d.predicted_rct + ' Ω' : '—');
-
     setText('ambient-temp',         d.ambient_temperature != null ? d.ambient_temperature + ' °C' : '—');
     setText('sense-current',        d.sense_current        != null ? d.sense_current        + ' A'  : '—');
     setText('battery-current',      d.battery_current      != null ? d.battery_current      + ' A'  : '—');
     setText('current-ratio',        d.current_ratio        != null ? d.current_ratio               : '—');
     setText('battery-impedance',    d.battery_impedance    != null ? d.battery_impedance    + ' Ω' : '—');
     setText('rectified-impedance',  d.rectified_impedance  != null ? d.rectified_impedance  + ' Ω' : '—');
-
-    setText('serial-number',    d.serial_number    || '—');
-    setText('batch-id',         d.batch_id         || '—');
-    setText('weight',           d.weight_kg        != null ? d.weight_kg + ' kg' : '—');
-    setText('manufacture-date', d.manufacture_date || '—');
-    setText('manufacture-place',d.manufacture_place|| '—');
+    setText('serial-number',     d.serial_number     || '—');
+    setText('batch-id',          d.batch_id          || '—');
+    setText('weight',            d.weight_kg         != null ? d.weight_kg + ' kg' : '—');
+    setText('manufacture-date',  d.manufacture_date  || '—');
+    setText('manufacture-place', d.manufacture_place || '—');
     setText('tested-at', d.created_at ? new Date(d.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—');
   }
 
-  function showError(msg) {
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('error-box').style.display = 'flex';
-    setText('error-msg', msg);
+  // ── On page load: check if QR scan (URL has battery ID) ──
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  if (pathParts.length >= 2 && pathParts[0] === 'battery') {
+    loadBattery(pathParts[1]);
   }
-
-  loadBattery();
 </script>
 </body>
 </html>

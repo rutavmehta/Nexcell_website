@@ -4,490 +4,811 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Nexcell Battery Passport</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&family=Big+Shoulders+Display:wght@700;900&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rose:#ff2d6b;--rose-g:rgba(255,45,107,0.18);--rose-t:rgba(255,45,107,0.07);
+  --blue:#0ea5e9;--blue-g:rgba(14,165,233,0.18);--blue-t:rgba(14,165,233,0.07);
+  --amber:#f59e0b;--amber-g:rgba(245,158,11,0.18);--amber-t:rgba(245,158,11,0.07);
+  --mint:#10b981;--mint-g:rgba(16,185,129,0.18);
+  --violet:#8b5cf6;
+  --white:#ffffff;--off:rgba(255,255,255,0.85);--dim:rgba(255,255,255,0.4);
+  --ghost:rgba(255,255,255,0.12);--nano:rgba(255,255,255,0.05);
+  --serif:'Instrument Serif',Georgia,serif;
+  --display:'Big Shoulders Display',sans-serif;
+  --body:'Syne','Neue Haas Grotesk',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  /* CODE1 semantic colours kept as aliases */
+  --accent-green:#22c55e;
+  --accent-yellow:#facc15;
+  --accent-red:#ef4444;
+}
+html{scroll-behavior:smooth}
+body{
+  background:#020408;color:var(--white);
+  font-family:var(--body);font-size:13px;line-height:1.5;
+  min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
 
-  :root {
-    --bg: #080810;
-    --surface: #0f0f1a;
-    --card: #13131f;
-    --border: #1e1e30;
-    --text: #e8e8f0;
-    --muted: #6b6b8a;
-    --accent-green: #22c55e;
-    --accent-yellow: #facc15;
-    --accent-red: #ef4444;
-  }
+/* ── Aurora canvas ── */
+#aurora{position:fixed;inset:0;z-index:0;pointer-events:none}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.028;mix-blend-mode:overlay}
+.vignette{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 40%,rgba(2,4,8,.7) 100%)}
+.scanline{position:fixed;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.15) 20%,rgba(14,165,233,.4) 50%,rgba(255,255,255,.15) 80%,transparent 100%);
+  pointer-events:none;z-index:999;animation:scan 10s ease-in-out infinite}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+.page{position:relative;z-index:10;max-width:900px;margin:0 auto;padding:0 28px 120px}
 
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(34,197,94,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(250,204,21,0.05) 0%, transparent 60%);
-    pointer-events: none; z-index: 0;
-  }
+/* ── Keyframes ── */
+@keyframes scan{0%{top:-10%;opacity:0}5%{opacity:.6}90%{opacity:.25}100%{top:105%;opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rev{to{transform:rotate(-360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.6}}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes bar-flow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes shimmer{0%{background-position:-300% center}100%{background-position:300% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 
-  .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+/* ══════════════════════════════════
+   SEARCH SCREEN
+══════════════════════════════════ */
+#search-screen{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;position:relative;gap:0;
+}
+.wordmark{display:flex;flex-direction:column;align-items:center;gap:0;margin-bottom:44px}
+.wm-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:12px}
+.wm-title{
+  font-family:var(--display);font-size:clamp(80px,16vw,180px);font-weight:900;
+  letter-spacing:-.03em;line-height:.85;text-align:center;
+  color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.15);
+  position:relative;user-select:none;
+}
+.wm-title .fill{
+  position:absolute;inset:0;-webkit-text-stroke:0;
+  background:linear-gradient(135deg,#ff2d6b 0%,#f59e0b 35%,#0ea5e9 65%,#8b5cf6 100%);
+  background-size:300% auto;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:shimmer 7s linear infinite;
+  filter:drop-shadow(0 0 40px rgba(255,45,107,.3));
+}
+.wm-sub{font-family:var(--serif);font-style:italic;font-size:clamp(18px,3vw,28px);color:rgba(255,255,255,.35);letter-spacing:.01em;margin-top:8px}
 
-  /* ── Loader ── */
-  #loader { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; gap: 20px; }
-  .spinner { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--accent-green); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #loader p { color: var(--muted); font-size: 0.9rem; }
+/* Search card */
+.sp-wrap{width:100%;max-width:600px;position:relative}
+.sp{
+  position:relative;border-radius:28px;padding:40px;overflow:hidden;
+  background:linear-gradient(135deg,rgba(255,45,107,.1) 0%,rgba(255,255,255,.04) 40%,rgba(14,165,233,.06) 100%);
+  border:1px solid rgba(255,45,107,.25);
+  backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.04),0 32px 80px rgba(255,45,107,.08),0 8px 32px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(255,45,107,.1);
+  transition:box-shadow .4s;
+}
+.sp::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,45,107,.6),rgba(255,255,255,.3),rgba(14,165,233,.4),transparent)}
+.sp::after{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,45,107,.18),rgba(245,158,11,.1),transparent 70%);border-radius:50%;pointer-events:none}
+.sp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.sp-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,45,107,.7);display:flex;align-items:center;gap:8px}
+.sp-lbl-dot{width:5px;height:5px;border-radius:50%;background:var(--rose);box-shadow:0 0 8px var(--rose);animation:pulse 2s ease infinite}
+.sp-reg{font-family:var(--mono);font-size:8px;letter-spacing:.15em;color:rgba(255,255,255,.15)}
+.sp-row{display:flex;gap:10px;margin-bottom:8px}
+.sp-in{
+  flex:1;padding:16px 20px;background:rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.1);border-radius:14px;
+  color:var(--white);font-family:var(--mono);font-size:14px;letter-spacing:.08em;
+  outline:none;transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.sp-in:focus{border-color:rgba(255,45,107,.5);background:rgba(255,45,107,.04);box-shadow:0 0 0 4px rgba(255,45,107,.08),0 0 30px rgba(255,45,107,.1)}
+.sp-in::placeholder{color:rgba(255,255,255,.2)}
+.sp-btn{
+  padding:16px 32px;background:linear-gradient(135deg,#ff2d6b,#f59e0b);
+  color:#fff;border:none;border-radius:14px;cursor:pointer;
+  font-family:var(--body);font-size:13px;font-weight:700;letter-spacing:.06em;white-space:nowrap;
+  transition:transform .15s,box-shadow .2s,filter .2s;position:relative;overflow:hidden;
+}
+.sp-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);opacity:0;transition:opacity .2s}
+.sp-btn:hover{transform:translateY(-2px);filter:brightness(1.15);box-shadow:0 12px 40px rgba(255,45,107,.4)}
+.sp-btn:hover::after{opacity:1}
+.sp-btn:active{transform:translateY(0)}
+.sp-err{display:none;margin-top:8px;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--rose)}
+.sp-hint{margin-top:14px;font-size:.78rem;color:rgba(255,255,255,.25);text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:.06em}
 
-  /* ── Error ── */
-  #error-box { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; text-align: center; }
-  .error-icon { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
-  #error-box h2 { font-size: 1.4rem; color: var(--accent-red); }
-  #error-msg { color: var(--muted); max-width: 360px; line-height: 1.6; }
-  .try-again-btn {
-    margin-top: 8px; padding: 10px 28px;
-    background: transparent; border: 1px solid var(--border);
-    color: var(--text); border-radius: 10px; cursor: pointer;
-    font-family: 'Inter', sans-serif; font-size: 0.9rem;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .try-again-btn:hover { border-color: var(--accent-green); background: rgba(34,197,94,0.06); }
+/* ══════════════════════════════════
+   LOADER
+══════════════════════════════════ */
+#loader{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:28px}
+.ld-ring-wrap{width:80px;height:80px;position:relative;display:flex;align-items:center;justify-content:center}
+.ld-r{position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent}
+.lr-a{border-top-color:var(--rose);border-right-color:rgba(255,45,107,.2);animation:spin .8s linear infinite}
+.lr-b{inset:14px;border-bottom-color:var(--blue);border-left-color:rgba(14,165,233,.2);animation:rev 1.2s linear infinite}
+.lr-c{inset:26px;border-top-color:var(--amber);animation:spin .6s linear infinite}
+.ld-core{width:10px;height:10px;border-radius:50%;background:var(--rose);box-shadow:0 0 20px var(--rose);animation:pulse 1.4s ease infinite}
+.ld-txt{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.ld-txt span{color:var(--rose);animation:blink .7s step-start infinite}
+.ld-bar{width:220px;height:1px;background:rgba(255,255,255,.06);border-radius:1px;overflow:hidden}
+.ld-fill{height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--amber),var(--blue));background-size:200%;animation:bar-flow 2s linear infinite;border-radius:1px}
 
-  /* ── Search Screen ── */
-  #search-screen {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; min-height: 90vh; gap: 0;
-    animation: fadeUp 0.5s ease;
-  }
-  .search-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .search-logo-icon {
-    width: 52px; height: 52px;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    border-radius: 16px; display: flex; align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 32px rgba(34,197,94,0.25);
-  }
-  .search-logo-text { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; }
-  .search-logo-text span { color: var(--accent-green); }
-  .search-tagline { color: var(--muted); font-size: 0.95rem; margin-bottom: 44px; text-align: center; line-height: 1.6; }
-  .search-box {
-    width: 100%; max-width: 480px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 18px; padding: 28px 28px 24px;
-  }
-  .search-box label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 10px; }
-  .search-input-row { display: flex; gap: 10px; }
-  .search-input {
-    flex: 1; padding: 12px 16px;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 10px; color: var(--text);
-    font-family: 'Inter', sans-serif; font-size: 0.95rem;
-    outline: none; transition: border-color 0.2s;
-  }
-  .search-input:focus { border-color: var(--accent-green); }
-  .search-input::placeholder { color: var(--muted); }
-  .search-btn {
-    padding: 12px 22px;
-    background: var(--accent-green); color: #000;
-    border: none; border-radius: 10px; cursor: pointer;
-    font-family: 'Inter', sans-serif; font-size: 0.95rem;
-    font-weight: 700; transition: background 0.2s; white-space: nowrap;
-  }
-  .search-btn:hover { background: #16a34a; }
-  .search-hint { margin-top: 14px; font-size: 0.78rem; color: var(--muted); text-align: center; }
-  .search-error { margin-top: 12px; color: var(--accent-red); font-size: 0.82rem; display: none; }
+/* ══════════════════════════════════
+   ERROR
+══════════════════════════════════ */
+#error-box{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:20px;text-align:center}
+.er-icon{width:80px;height:80px;border-radius:24px;border:1px solid rgba(255,45,107,.2);background:rgba(255,45,107,.06);display:flex;align-items:center;justify-content:center}
+.er-h{font-family:var(--display);font-size:36px;font-weight:900;letter-spacing:.02em;color:var(--rose)}
+.er-p{font-size:13px;color:rgba(255,255,255,.4);max-width:360px;line-height:1.8}
+.er-btn{padding:12px 36px;background:transparent;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7);border-radius:12px;cursor:pointer;font-family:var(--body);font-size:12px;font-weight:600;letter-spacing:.06em;transition:all .2s}
+.er-btn:hover{border-color:rgba(255,45,107,.3);color:var(--rose);background:rgba(255,45,107,.06)}
 
-  /* ── Passport ── */
-  #passport { display: none; animation: fadeUp 0.5s ease; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+/* ══════════════════════════════════
+   PASSPORT
+══════════════════════════════════ */
+#passport{display:none}
 
-  /* ── Top bar ── */
-  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
-  .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-  .logo-text { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
-  .logo-text span { color: var(--accent-green); }
-  .passport-label { font-size: 0.72rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; font-weight: 500; }
-  .back-btn {
-    display: flex; align-items: center; gap: 6px;
-    background: transparent; border: 1px solid var(--border);
-    color: var(--muted); padding: 6px 14px; border-radius: 8px;
-    cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.8rem;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .back-btn:hover { border-color: var(--accent-green); color: var(--text); }
+/* Top bar */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 0 20px;border-bottom:1px solid rgba(255,255,255,.06);opacity:0;
+}
+.logo{display:flex;align-items:center;gap:12px;cursor:pointer;text-decoration:none}
+.logo-gem{
+  width:38px;height:38px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(255,45,107,.2),rgba(14,165,233,.15));
+  border:1px solid rgba(255,45,107,.3);display:flex;align-items:center;justify-content:center;
+  transition:all .25s;box-shadow:0 0 20px rgba(255,45,107,.1);
+}
+.logo:hover .logo-gem{box-shadow:0 0 30px rgba(255,45,107,.25);border-color:rgba(255,45,107,.5)}
+.logo-name{font-family:var(--display);font-size:26px;font-weight:900;letter-spacing:.02em}
+.logo-name em{font-style:normal;background:linear-gradient(90deg,var(--rose),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tb-r{display:flex;align-items:center;gap:14px}
+.tb-tag{font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.2)}
+.tb-back{
+  padding:9px 20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.5);border-radius:10px;cursor:pointer;
+  font-family:var(--body);font-size:11px;font-weight:600;letter-spacing:.04em;transition:all .2s;
+}
+.tb-back:hover{border-color:rgba(255,45,107,.3);color:var(--rose);background:rgba(255,45,107,.05)}
 
-  /* ── Hero ── */
-  .hero { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px; margin-bottom: 20px; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
-  .hero-tag { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-green); margin-bottom: 8px; }
-  .hero-battery-id { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 8px; }
-  .hero-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-  .meta-chip { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 0.78rem; color: var(--muted); }
-  .meta-chip strong { color: var(--text); font-weight: 500; }
-  .status-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid; border-radius: 999px; padding: 6px 16px; font-size: 0.8rem; font-weight: 600; margin-top: 16px; }
-  .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+/* ── HERO ── */
+.hero{
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  min-height:380px;border-bottom:1px solid rgba(255,255,255,.06);
+  opacity:0;position:relative;overflow:hidden;
+}
+.hero::after{
+  content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(255,45,107,.3),rgba(14,165,233,.3),transparent);
+}
+.hero-l{padding:0;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.hero-l::before{content:'';position:absolute;bottom:-80px;left:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(255,45,107,.07),transparent 70%);pointer-events:none;border-radius:50%}
+.hero-l-top{flex:1;padding:52px 48px 32px;display:flex;flex-direction:column;gap:0}
+.h-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:20px;opacity:0}
+.h-eyebrow-line{width:32px;height:1.5px;background:linear-gradient(90deg,var(--rose),transparent)}
+.h-eyebrow-txt{font-family:var(--mono);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,45,107,.6)}
+.h-id{
+  font-family:var(--display);font-size:clamp(44px,6vw,78px);font-weight:900;
+  letter-spacing:-.02em;line-height:.9;color:var(--white);
+  margin-bottom:28px;opacity:0;text-shadow:0 0 60px rgba(255,45,107,.15);
+}
+.h-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:28px;opacity:0}
+.h-chip{
+  font-family:var(--mono);font-size:9px;letter-spacing:.07em;padding:5px 14px;border-radius:6px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.4);display:flex;align-items:center;gap:6px;
+}
+.h-chip strong{color:rgba(255,255,255,.7);font-weight:400}
+.h-status{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:9px;font-size:11px;font-weight:600;letter-spacing:.06em;opacity:0}
+.h-status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.8s ease infinite}
+.h-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.h-stat{padding:16px 24px;border-right:1px solid rgba(255,255,255,.06);opacity:0}
+.h-stat:nth-child(2),.h-stat:nth-child(4){border-right:none}
+.h-stat-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:5px}
+.h-stat-val{font-family:var(--mono);font-size:14px;font-weight:500}
+.cv-rose{color:var(--rose)}.cv-blue{color:var(--blue)}.cv-amber{color:var(--amber)}.cv-mint{color:var(--mint)}
 
-  /* ── Gauge ── */
-  .gauge-wrap { text-align: center; }
-  canvas#gauge-canvas { display: block; margin: 0 auto; }
-  .gauge-center { margin-top: -28px; }
-  .gauge-value { font-size: 2rem; font-weight: 800; line-height: 1; }
-  .gauge-sub { font-size: 0.7rem; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.08em; }
+/* Right side — gauge */
+.hero-r{padding:52px 48px 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;opacity:0}
+.hero-r::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(14,165,233,.06),transparent 70%);pointer-events:none;border-radius:50%}
+.soh-lbl-top{font-family:var(--mono);font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:20px}
+.soh-big{font-family:var(--display);font-size:130px;font-weight:900;letter-spacing:-.04em;line-height:.85;color:var(--white);text-align:center;position:relative}
+.soh-big .soh-pct{font-size:40px;color:rgba(255,255,255,.3);vertical-align:top;padding-top:14px}
+.soh-sub{font-family:var(--mono);font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:12px}
+canvas#gauge-canvas{display:block;margin:20px auto 0}
+.g-ticks{display:flex;justify-content:space-between;width:190px;margin-top:8px}
+.g-ticks span{font-family:var(--mono);font-size:8px;color:rgba(255,255,255,.2)}
 
-  /* ── Cards ── */
-  .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  .card-full { grid-column: 1 / -1; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px; transition: border-color 0.2s; }
-  .card:hover { border-color: #2a2a40; }
-  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-  .card-icon { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .card-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-  .data-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
-  .data-row:last-child { border-bottom: none; }
-  .data-label { color: var(--muted); flex-shrink: 0; }
-  .data-value { font-weight: 500; text-align: right; max-width: 55%; word-break: break-all; }
-  .soh-bars { display: flex; flex-direction: column; gap: 14px; }
-  .soh-bar-item label { font-size: 0.8rem; color: var(--muted); display: flex; justify-content: space-between; margin-bottom: 6px; }
-  .soh-bar-item label span { font-weight: 600; color: var(--text); }
-  .bar-track { background: var(--border); border-radius: 999px; height: 8px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 999px; transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+/* ── Section label ── */
+.sec-lbl{display:flex;align-items:center;gap:16px;padding:40px 0 20px;opacity:0}
+.sec-lbl-rule{flex:1;height:1px;background:rgba(255,255,255,.06)}
+.sec-lbl-txt{font-family:var(--serif);font-style:italic;font-size:15px;color:rgba(255,255,255,.3);white-space:nowrap;letter-spacing:.02em}
+.sec-lbl-num{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:rgba(255,255,255,.15)}
 
-  /* ── Footer ── */
-  .footer { text-align: center; margin-top: 40px; color: var(--muted); font-size: 0.78rem; line-height: 1.8; }
-  .footer strong { color: var(--accent-green); }
+/* ── Grid + Cards ── */
+.cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.card-full{grid-column:1/-1}
 
-  /* ── Responsive ── */
-  @media (max-width: 600px) {
-    .hero { grid-template-columns: 1fr; }
-    .gauge-wrap { display: none; }
-    .cards-grid { grid-template-columns: 1fr; }
-    .hero-battery-id { font-size: 1.5rem; }
-    .search-box { padding: 22px 18px; }
-  }
+.card{
+  border-radius:24px;padding:32px;position:relative;overflow:hidden;opacity:0;
+  transition:transform .3s,box-shadow .3s;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.card:hover{transform:translateY(-3px)}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);opacity:.5}
+
+.card-rose{
+  background:linear-gradient(145deg,rgba(255,45,107,.12) 0%,rgba(255,45,107,.05) 40%,rgba(0,0,0,.4) 100%);
+  border:1px solid rgba(255,45,107,.2);
+  box-shadow:0 24px 60px rgba(255,45,107,.06),inset 0 0 60px rgba(255,45,107,.02);
+}
+.card-rose:hover{box-shadow:0 32px 80px rgba(255,45,107,.12),inset 0 0 60px rgba(255,45,107,.04)}
+.card-rose::after{content:'';position:absolute;bottom:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,45,107,.1),transparent 70%);pointer-events:none}
+
+.card-blue{
+  background:linear-gradient(145deg,rgba(14,165,233,.12) 0%,rgba(14,165,233,.05) 40%,rgba(0,0,0,.4) 100%);
+  border:1px solid rgba(14,165,233,.2);
+  box-shadow:0 24px 60px rgba(14,165,233,.06),inset 0 0 60px rgba(14,165,233,.02);
+}
+.card-blue:hover{box-shadow:0 32px 80px rgba(14,165,233,.12),inset 0 0 60px rgba(14,165,233,.04)}
+.card-blue::after{content:'';position:absolute;bottom:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,.1),transparent 70%);pointer-events:none}
+
+.card-amber{
+  background:linear-gradient(145deg,rgba(245,158,11,.1) 0%,rgba(245,158,11,.04) 40%,rgba(0,0,0,.4) 100%);
+  border:1px solid rgba(245,158,11,.2);
+  box-shadow:0 24px 60px rgba(245,158,11,.05),inset 0 0 60px rgba(245,158,11,.02);
+}
+.card-amber:hover{box-shadow:0 32px 80px rgba(245,158,11,.1),inset 0 0 60px rgba(245,158,11,.04)}
+.card-amber::after{content:'';position:absolute;bottom:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.08),transparent 70%);pointer-events:none}
+
+.ch{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.ci{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .25s}
+.card:hover .ci{transform:scale(1.1) rotate(-5deg)}
+.ct-lbl{font-family:var(--display);font-size:18px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.cbadge{margin-left:auto;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;padding:4px 12px;border-radius:5px}
+.badge-rose{background:rgba(255,45,107,.12);color:rgba(255,45,107,.8);border:1px solid rgba(255,45,107,.15)}
+.badge-blue{background:rgba(14,165,233,.12);color:rgba(14,165,233,.8);border:1px solid rgba(14,165,233,.15)}
+.badge-amber{background:rgba(245,158,11,.12);color:rgba(245,158,11,.8);border:1px solid rgba(245,158,11,.15)}
+
+.data-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);gap:12px;
+  transition:padding .15s,background .2s;border-radius:4px;
+}
+.data-row:last-child{border-bottom:none;padding-bottom:0}
+.data-row:hover{padding-left:8px}
+.data-label{font-size:11px;color:rgba(255,255,255,.3);flex-shrink:0;font-family:var(--body)}
+.data-value{font-family:var(--mono);font-size:10px;text-align:right;color:rgba(255,255,255,.6);word-break:break-all}
+.data-value.cv-rose{color:var(--rose)}
+
+/* Health Analysis — SOH bars */
+.soh-g{display:flex;flex-direction:column;gap:28px}
+.soh-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+.soh-lbl{font-size:11px;color:rgba(255,255,255,.3)}
+.soh-v{font-family:var(--display);font-size:32px;font-weight:900;letter-spacing:-.02em;line-height:1}
+.bar-bg{height:3px;background:rgba(255,255,255,.06);border-radius:3px;position:relative}
+.bar-fg{height:100%;border-radius:3px;width:0;position:relative;background-size:300% auto;animation:bar-flow 3s linear infinite}
+.bar-rose{background:linear-gradient(90deg,#ff2d6b,#f59e0b,#ff2d6b)}
+.bar-blue{background:linear-gradient(90deg,#0ea5e9,#8b5cf6,#0ea5e9)}
+.bar-fg::after{content:'';position:absolute;right:0;top:50%;transform:translateY(-50%);width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 14px currentColor,0 0 28px currentColor}
+.bar-note{margin-top:8px;font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.2)}
+
+/* Impedance tiles */
+.imp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,.05)}
+.imp-tile{border-radius:16px;padding:20px;transition:transform .2s;position:relative;overflow:hidden}
+.imp-tile:hover{transform:scale(1.03)}
+.imp-tile-rose{background:rgba(255,45,107,.07);border:1px solid rgba(255,45,107,.15)}
+.imp-tile-blue{background:rgba(14,165,233,.07);border:1px solid rgba(14,165,233,.15)}
+.it-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}
+.it-lbl-rose{color:rgba(255,45,107,.6)}
+.it-lbl-blue{color:rgba(14,165,233,.6)}
+.it-val{font-family:var(--display);font-size:28px;font-weight:900;letter-spacing:-.01em;line-height:1}
+
+/* Identity grid */
+.id-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 64px}
+.id-sec-hd{
+  font-family:var(--display);font-size:12px;font-weight:900;letter-spacing:.18em;
+  text-transform:uppercase;color:rgba(255,255,255,.25);
+  margin-bottom:16px;padding-bottom:12px;
+  border-bottom:1px solid rgba(245,158,11,.15);
+  display:flex;align-items:center;gap:10px;
+}
+.id-sec-hd::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(245,158,11,.2),transparent)}
+
+/* Footer */
+.footer{text-align:center;margin-top:64px;padding:28px;border-top:1px solid rgba(255,255,255,.05);opacity:0}
+.footer-txt{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.2);line-height:2.8}
+.footer-strong{background:linear-gradient(90deg,var(--rose),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#020408}
+::-webkit-scrollbar-thumb{background:rgba(255,45,107,.2);border-radius:2px}
+
+@media(max-width:600px){
+  .hero{grid-template-columns:1fr}
+  .hero-r{display:none}
+  .cards-grid{grid-template-columns:1fr}
+  .id-grid{grid-template-columns:1fr;gap:0}
+  .page{padding:0 16px 80px}
+  .hero-l-top{padding:32px 20px 24px}
+  .h-id{font-size:48px}
+  .h-stats{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
+
+<!-- Aurora background -->
+<canvas id="aurora"></canvas>
+<div class="grain"></div>
+<div class="vignette"></div>
+<div class="scanline"></div>
+
 <div class="page">
 
-  <!-- Search Screen -->
+  <!-- ═══ SEARCH SCREEN ═══ -->
   <div id="search-screen">
-    <div class="search-logo">
-      <div class="search-logo-icon">
-        <!-- Lightning bolt / battery icon -->
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M13 2L4.09 12.96H11L10 22L20.09 11H13L13 2Z" fill="#000" stroke="#000" stroke-width="1.2" stroke-linejoin="round"/>
-        </svg>
+    <div class="wordmark" id="wordmark">
+      <div class="wm-eyebrow">Digital Battery Passport System</div>
+      <div class="wm-title">
+        <span class="fill" aria-hidden="true">NEXCELL</span>
+        NEXCELL
       </div>
-      <div class="search-logo-text">Nex<span>cell</span></div>
+      <div class="wm-sub">Battery Intelligence Platform</div>
     </div>
-    <p class="search-tagline">Digital Battery Passport System<br/>Enter a Battery ID or scan a QR code to view its passport</p>
-    <div class="search-box">
-      <label>Battery ID</label>
-      <div class="search-input-row">
-        <input class="search-input" id="search-input" type="text" placeholder="e.g. NCL-2026-0042" autocomplete="off" spellcheck="false"/>
-        <button class="search-btn" onclick="handleSearch()">Look Up →</button>
+
+    <div class="sp-wrap" id="sp-wrap">
+      <div class="sp" id="sp">
+        <div class="sp-header">
+          <div class="sp-lbl"><div class="sp-lbl-dot"></div>Battery ID</div>
+          <div class="sp-reg">SECURE · VERIFIED</div>
+        </div>
+        <div class="sp-row">
+          <input class="sp-in" id="search-input" type="text" placeholder="e.g. NCL-2026-0042" autocomplete="off" spellcheck="false"/>
+          <button class="sp-btn" onclick="handleSearch()">Look Up →</button>
+        </div>
+        <div class="sp-err" id="search-error">— identifier required</div>
+        <div class="sp-hint">You can also scan any Nexcell QR code to go directly to a battery passport</div>
       </div>
-      <div class="search-error" id="search-error">⚠ Please enter a Battery ID</div>
-      <div class="search-hint">You can also scan any Nexcell QR code to go directly to a battery passport</div>
     </div>
   </div>
 
-  <!-- Loader -->
+  <!-- ═══ LOADER ═══ -->
   <div id="loader">
-    <div class="spinner"></div>
-    <p>Fetching battery passport…</p>
+    <div class="ld-ring-wrap">
+      <div class="ld-r lr-a"></div>
+      <div class="ld-r lr-b"></div>
+      <div class="ld-r lr-c"></div>
+      <div class="ld-core"></div>
+    </div>
+    <div class="ld-txt">Fetching battery passport <span>_</span></div>
+    <div class="ld-bar"><div class="ld-fill" id="ld-fill"></div></div>
   </div>
 
-  <!-- Error -->
+  <!-- ═══ ERROR ═══ -->
   <div id="error-box">
-    <div class="error-icon">
-      <!-- Battery with X icon -->
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="6" y="14" width="38" height="28" rx="4" stroke="#ef4444" stroke-width="2.2" fill="none"/>
-        <rect x="44" y="21" width="6" height="14" rx="2" stroke="#ef4444" stroke-width="2" fill="none"/>
-        <line x1="16" y1="22" x2="34" y2="34" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
-        <line x1="34" y1="22" x2="16" y2="34" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+    <div class="er-icon">
+      <svg width="32" height="32" viewBox="0 0 28 28" fill="none">
+        <rect x="1" y="5" width="21" height="17" rx="2.5" stroke="#ff2d6b" stroke-width="1.2"/>
+        <rect x="22" y="10" width="4" height="7" rx="1.2" stroke="#ff2d6b" stroke-width="1.2"/>
+        <line x1="8.5" y1="10.5" x2="16.5" y2="18.5" stroke="#ff2d6b" stroke-width="1.3" stroke-linecap="round"/>
+        <line x1="16.5" y1="10.5" x2="8.5" y2="18.5" stroke="#ff2d6b" stroke-width="1.3" stroke-linecap="round"/>
       </svg>
     </div>
-    <h2>Battery Not Found</h2>
-    <p id="error-msg">This battery ID does not exist in the Nexcell database.</p>
-    <button class="try-again-btn" onclick="goBack()">← Try Another ID</button>
+    <div class="er-h">Battery Not Found</div>
+    <p class="er-p" id="error-msg">This battery ID does not exist in the Nexcell database.</p>
+    <button class="er-btn" onclick="goBack()">← Try Another ID</button>
   </div>
 
-  <!-- Passport -->
+  <!-- ═══ PASSPORT ═══ -->
   <div id="passport">
-    <div class="topbar">
+
+    <!-- Top bar -->
+    <div class="topbar" id="topbar">
       <div class="logo" onclick="goBack()">
-        <div class="logo-icon">
-          <!-- Small lightning bolt -->
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M13 2L4.09 12.96H11L10 22L20.09 11H13L13 2Z" fill="#000" stroke="#000" stroke-width="1" stroke-linejoin="round"/>
+        <div class="logo-gem">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="1" y="5" width="18" height="14" rx="2.5" stroke="#ff2d6b" stroke-width="1.4"/>
+            <rect x="19" y="9" width="4" height="6" rx="1.2" stroke="#f59e0b" stroke-width="1.4"/>
+            <path d="M13 8.5L9 13h4l-.8 4.5 6-7h-4L13 8.5z" fill="#ff2d6b"/>
           </svg>
         </div>
-        <div class="logo-text">Nex<span>cell</span></div>
+        <div class="logo-name">Nex<em>Cell</em></div>
       </div>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div class="passport-label">Digital Battery Passport</div>
-        <button class="back-btn" onclick="goBack()">← Search</button>
+      <div class="tb-r">
+        <div class="tb-tag">Digital Battery Passport</div>
+        <button class="tb-back" onclick="goBack()">← Search</button>
       </div>
     </div>
 
-    <div class="hero">
-      <div class="hero-left">
-        <div class="hero-tag">Battery Passport</div>
-        <div class="hero-battery-id" id="battery-id">—</div>
-        <div class="hero-meta">
-          <div class="meta-chip">Manufacturer: <strong id="manufacturer">—</strong></div>
-          <div class="meta-chip">Model: <strong id="model">—</strong></div>
+    <!-- HERO -->
+    <div class="hero" id="hero">
+      <div class="hero-l">
+        <div class="hero-l-top">
+          <div class="h-eyebrow" id="h-eyebrow">
+            <div class="h-eyebrow-line"></div>
+            <div class="h-eyebrow-txt">Battery Passport · Verified</div>
+          </div>
+          <div class="h-id" id="battery-id">—</div>
+          <div class="h-chips" id="h-chips">
+            <div class="h-chip">Manufacturer <strong id="manufacturer">—</strong></div>
+            <div class="h-chip">Model <strong id="model">—</strong></div>
+          </div>
+          <div class="h-status" id="status-pill">
+            <div class="h-status-dot"></div>
+            <span id="status-text">—</span>
+          </div>
         </div>
-        <div class="status-badge" id="status-badge">—</div>
-      </div>
-      <div class="gauge-wrap">
-        <canvas id="gauge-canvas" width="200" height="130"></canvas>
-        <div class="gauge-center">
-          <div class="gauge-value" id="soh-value">—</div>
-          <div class="gauge-sub">Avg. SOH</div>
+        <div class="h-stats">
+          <div class="h-stat" id="hs0"><div class="h-stat-lbl">Impedance</div><div class="h-stat-val cv-rose" id="s-imp">—</div></div>
+          <div class="h-stat" id="hs1"><div class="h-stat-lbl">Temperature</div><div class="h-stat-val cv-blue" id="s-tmp">—</div></div>
+          <div class="h-stat" id="hs2"><div class="h-stat-lbl">Batch ID</div><div class="h-stat-val" id="s-bat">—</div></div>
+          <div class="h-stat" id="hs3"><div class="h-stat-lbl">Origin</div><div class="h-stat-val" id="s-loc">—</div></div>
         </div>
       </div>
+
+      <div class="hero-r" id="hero-r">
+        <div class="soh-lbl-top">State of Health</div>
+        <div class="soh-big" id="soh-value">—<span class="soh-pct">%</span></div>
+        <div class="soh-sub">Avg. SOH · EIS-Derived</div>
+        <canvas id="gauge-canvas" width="190" height="108"></canvas>
+        <div class="g-ticks"><span>0</span><span>50</span><span>100</span></div>
+      </div>
+    </div>
+
+    <!-- Section 01 -->
+    <div class="sec-lbl" id="sec-lbl-0">
+      <div class="sec-lbl-rule"></div>
+      <div class="sec-lbl-txt">Electrochemical Analysis</div>
+      <div class="sec-lbl-num">01</div>
+      <div class="sec-lbl-rule"></div>
     </div>
 
     <div class="cards-grid">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon" style="background:rgba(34,197,94,0.12);">
-            <!-- Activity / health waveform icon -->
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polyline points="2,12 6,12 8,5 10,19 12,9 14,15 16,12 22,12" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+      <!-- Health Analysis (CODE1 data, CODE2 UI) -->
+      <div class="card card-rose" id="c0">
+        <div class="ch">
+          <div class="ci" style="background:rgba(255,45,107,.1);border:1px solid rgba(255,45,107,.2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <polyline points="2,12 5,12 7,5 9,19 11,10 13,14 15,12 22,12" stroke="#ff2d6b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
-          <div class="card-title">Health Analysis</div>
+          <div class="ct-lbl">Health Analysis</div>
+          <div class="cbadge badge-rose">EIS-Derived</div>
         </div>
-        <div class="soh-bars">
-          <div class="soh-bar-item">
-            <label>SOH from Re (Electrolyte) <span id="soh-re">—</span></label>
-            <div class="bar-track"><div class="bar-fill" id="bar-re" style="width:0%; background:#22c55e;"></div></div>
+
+        <div class="soh-g">
+          <div>
+            <div class="soh-hd">
+              <div class="soh-lbl">SOH from Re (Electrolyte)</div>
+              <div class="soh-v cv-rose" id="soh-re">—</div>
+            </div>
+            <div class="bar-bg"><div class="bar-fg bar-rose" id="bar-re"></div></div>
+            <div class="bar-note">Electrolyte resistance pathway</div>
           </div>
-          <div class="soh-bar-item">
-            <label>SOH from Rct (Charge Transfer) <span id="soh-rct">—</span></label>
-            <div class="bar-track"><div class="bar-fill" id="bar-rct" style="width:0%; background:#3b82f6;"></div></div>
+          <div>
+            <div class="soh-hd">
+              <div class="soh-lbl">SOH from Rct (Charge Transfer)</div>
+              <div class="soh-v cv-blue" id="soh-rct">—</div>
+            </div>
+            <div class="bar-bg"><div class="bar-fg bar-blue" id="bar-rct"></div></div>
+            <div class="bar-note">Charge transfer resistance pathway</div>
           </div>
         </div>
-        <div style="margin-top: 20px;">
-          <div class="data-row"><span class="data-label">Predicted Re</span><span class="data-value" id="predicted-re">—</span></div>
-          <div class="data-row"><span class="data-label">Predicted Rct</span><span class="data-value" id="predicted-rct">—</span></div>
+
+        <div class="imp-row">
+          <div class="imp-tile imp-tile-rose">
+            <div class="it-lbl it-lbl-rose">Predicted Rₑ</div>
+            <div class="it-val cv-rose" id="predicted-re">—</div>
+          </div>
+          <div class="imp-tile imp-tile-blue">
+            <div class="it-lbl it-lbl-blue">Predicted Rct</div>
+            <div class="it-val cv-blue" id="predicted-rct">—</div>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon" style="background:rgba(59,130,246,0.12);">
-            <!-- EIS / impedance spectroscopy icon: sine wave through a circuit -->
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="3" stroke="#3b82f6" stroke-width="2" fill="none"/>
-              <path d="M2 12 L6 12 M18 12 L22 12" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/>
-              <path d="M6 12 Q7.5 6 9 12 Q10.5 18 12 12" stroke="#3b82f6" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-              <path d="M12 12 Q13.5 6 15 12 Q16.5 18 18 12" stroke="#3b82f6" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      <!-- EIS Readings (CODE1 data, CODE2 UI) -->
+      <div class="card card-blue" id="c1">
+        <div class="ch">
+          <div class="ci" style="background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="3" stroke="#0ea5e9" stroke-width="1.6"/>
+              <path d="M2 12h3M19 12h3" stroke="#0ea5e9" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M5 12Q6.5 7 8 12Q9.5 17 11 12" stroke="#8b5cf6" stroke-width="1.2" fill="none"/>
+              <path d="M13 12Q14.5 7 16 12Q17.5 17 19 12" stroke="#8b5cf6" stroke-width="1.2" fill="none"/>
             </svg>
           </div>
-          <div class="card-title">EIS Readings</div>
+          <div class="ct-lbl">EIS Readings</div>
+          <div class="cbadge badge-blue">Nyquist</div>
         </div>
-        <div class="data-row"><span class="data-label">Ambient Temp</span><span class="data-value" id="ambient-temp">—</span></div>
+        <div class="data-row"><span class="data-label">Ambient Temp</span><span class="data-value cv-blue" id="ambient-temp">—</span></div>
         <div class="data-row"><span class="data-label">Sense Current</span><span class="data-value" id="sense-current">—</span></div>
         <div class="data-row"><span class="data-label">Battery Current</span><span class="data-value" id="battery-current">—</span></div>
         <div class="data-row"><span class="data-label">Current Ratio</span><span class="data-value" id="current-ratio">—</span></div>
-        <div class="data-row"><span class="data-label">Battery Impedance</span><span class="data-value" id="battery-impedance">—</span></div>
+        <div class="data-row"><span class="data-label">Battery Impedance</span><span class="data-value cv-rose" id="battery-impedance">—</span></div>
         <div class="data-row"><span class="data-label">Rectified Impedance</span><span class="data-value" id="rectified-impedance">—</span></div>
       </div>
 
-      <div class="card card-full">
-        <div class="card-header">
-          <div class="card-icon" style="background:rgba(250,204,21,0.10);">
-            <!-- Traceability / QR / fingerprint icon -->
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="7" height="7" rx="1" stroke="#facc15" stroke-width="2" fill="none"/>
-              <rect x="14" y="3" width="7" height="7" rx="1" stroke="#facc15" stroke-width="2" fill="none"/>
-              <rect x="3" y="14" width="7" height="7" rx="1" stroke="#facc15" stroke-width="2" fill="none"/>
-              <rect x="5" y="5" width="3" height="3" rx="0.5" fill="#facc15"/>
-              <rect x="16" y="5" width="3" height="3" rx="0.5" fill="#facc15"/>
-              <rect x="5" y="16" width="3" height="3" rx="0.5" fill="#facc15"/>
-              <line x1="14" y1="14" x2="14" y2="14" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
-              <line x1="14" y1="17" x2="14" y2="21" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
-              <line x1="17" y1="14" x2="21" y2="14" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
-              <line x1="17" y1="21" x2="21" y2="21" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
-              <line x1="21" y1="17" x2="21" y2="21" stroke="#facc15" stroke-width="2" stroke-linecap="round"/>
+      <!-- Section 02 -->
+      <div class="sec-lbl card-full" id="sec-lbl-1" style="padding-bottom:4px">
+        <div class="sec-lbl-rule"></div>
+        <div class="sec-lbl-txt">Identity &amp; Traceability</div>
+        <div class="sec-lbl-num">02</div>
+        <div class="sec-lbl-rule"></div>
+      </div>
+
+      <!-- Battery Identity & Traceability (CODE1 data, CODE2 UI) -->
+      <div class="card card-amber card-full" id="c2">
+        <div class="ch">
+          <div class="ci" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="7" height="7" rx="1" stroke="#f59e0b" stroke-width="1.5"/>
+              <rect x="14" y="3" width="7" height="7" rx="1" stroke="#f59e0b" stroke-width="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1" stroke="#f59e0b" stroke-width="1.5"/>
+              <rect x="5" y="5" width="3" height="3" rx="0.5" fill="#f59e0b"/>
+              <rect x="16" y="5" width="3" height="3" rx="0.5" fill="#f59e0b"/>
+              <rect x="5" y="16" width="3" height="3" rx="0.5" fill="#f59e0b"/>
+              <line x1="14" y1="14" x2="14" y2="14" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+              <line x1="14" y1="17" x2="14" y2="21" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+              <line x1="17" y1="14" x2="21" y2="14" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+              <line x1="17" y1="21" x2="21" y2="21" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+              <line x1="21" y1="17" x2="21" y2="21" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </div>
-          <div class="card-title">Battery Identity &amp; Traceability</div>
+          <div class="ct-lbl">Battery Identity &amp; Traceability</div>
+          <div class="cbadge badge-amber">Certified</div>
         </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 32px;">
+        <div class="id-grid">
           <div>
-            <div class="data-row"><span class="data-label">Serial Number</span><span class="data-value" id="serial-number">—</span></div>
+            <div class="id-sec-hd">Registration</div>
+            <div class="data-row"><span class="data-label">Serial Number</span><span class="data-value cv-rose" id="serial-number">—</span></div>
             <div class="data-row"><span class="data-label">Batch ID</span><span class="data-value" id="batch-id">—</span></div>
             <div class="data-row"><span class="data-label">Weight</span><span class="data-value" id="weight">—</span></div>
           </div>
           <div>
+            <div class="id-sec-hd">Provenance</div>
             <div class="data-row"><span class="data-label">Date of Manufacture</span><span class="data-value" id="manufacture-date">—</span></div>
             <div class="data-row"><span class="data-label">Place of Manufacture</span><span class="data-value" id="manufacture-place">—</span></div>
             <div class="data-row"><span class="data-label">Last Tested</span><span class="data-value" id="tested-at">—</span></div>
           </div>
         </div>
       </div>
+
+    </div><!-- /cards-grid -->
+
+    <div class="footer" id="footer">
+      <div class="footer-txt">
+        Powered by <span class="footer-strong">Nexcell EIS Intelligence</span> · Digital Battery Passport<br/>
+        This report is generated using Electrochemical Impedance Spectroscopy (EIS) analysis
+      </div>
     </div>
 
-    <div class="footer">
-      Powered by <strong>Nexcell EIS Intelligence</strong> · Digital Battery Passport<br/>
-      This report is generated using Electrochemical Impedance Spectroscopy (EIS) analysis
-    </div>
-  </div>
-
-</div>
+  </div><!-- /passport -->
+</div><!-- /page -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = 'https://qedtgxkyfmjbqrgmgvcy.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZHRneGt5Zm1qYnFyZ21ndmN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NjAwNzMsImV4cCI6MjA4OTAzNjA3M30.SApfuEOgjc3c9K6q7JDmGhZTldVCQ407URjf02gzhoY';
-  const { createClient } = supabase;
-  const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  function show(id, displayType = 'flex') {
-    document.getElementById(id).style.display = displayType;
-  }
-  function hide(id) {
-    document.getElementById(id).style.display = 'none';
-  }
-
-  function goBack() {
-    hide('passport');
-    hide('error-box');
-    hide('loader');
-    show('search-screen', 'flex');
-    document.getElementById('search-input').value = '';
-    window.history.pushState({}, '', '/');
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('search-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleSearch();
+/* ── Aurora ── */
+(function(){
+  const cv=document.getElementById('aurora');
+  const ctx=cv.getContext('2d');
+  let W,H,t=0;
+  const orbs=[
+    {x:.15,y:.3,r:.4,hue:320,speed:.0004,phase:0},
+    {x:.75,y:.25,r:.45,hue:200,speed:.0003,phase:2},
+    {x:.5,y:.7,r:.5,hue:40,speed:.00035,phase:4},
+    {x:.85,y:.7,r:.35,hue:270,speed:.0005,phase:1},
+    {x:.2,y:.8,r:.38,hue:160,speed:.00025,phase:3},
+  ];
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  function draw(){
+    t+=16;ctx.clearRect(0,0,W,H);ctx.fillStyle='#020408';ctx.fillRect(0,0,W,H);
+    orbs.forEach(o=>{
+      const ox=Math.sin(t*o.speed+o.phase)*.12,oy=Math.cos(t*o.speed*.7+o.phase)*.08;
+      const cx=(o.x+ox)*W,cy=(o.y+oy)*H,r=o.r*Math.min(W,H);
+      const alpha=0.055+Math.sin(t*o.speed*2+o.phase)*.02;
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+      g.addColorStop(0,`hsla(${o.hue},90%,65%,${alpha})`);
+      g.addColorStop(.4,`hsla(${o.hue+20},80%,55%,${alpha*.6})`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
     });
-  });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
 
-  function handleSearch() {
-    const val = document.getElementById('search-input').value.trim();
-    const errEl = document.getElementById('search-error');
-    if (!val) {
-      errEl.style.display = 'block';
+/* ── Supabase (CODE1 credentials) ── */
+const SUPABASE_URL='https://qedtgxkyfmjbqrgmgvcy.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFlZHRneGt5Zm1qYnFyZ21ndmN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NjAwNzMsImV4cCI6MjA4OTAzNjA3M30.SApfuEOgjc3c9K6q7JDmGhZTldVCQ407URjf02gzhoY';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const $=id=>document.getElementById(id);
+const set=(id,v)=>{const e=$(id);if(e)e.textContent=v};
+const show=(id,d='flex')=>$(id).style.display=d;
+const hide=id=>$(id).style.display='none';
+
+/* ── Helpers ── */
+function getStatusStyle(soh){
+  if(soh>=85)return{solid:'#ff2d6b',glow:'rgba(255,45,107,.45)',bg:'rgba(255,45,107,.09)',brd:'rgba(255,45,107,.2)',lbl:'Excellent'};
+  if(soh>=70)return{solid:'#f59e0b',glow:'rgba(245,158,11,.45)',bg:'rgba(245,158,11,.09)',brd:'rgba(245,158,11,.2)',lbl:'Fair Condition'};
+  return{solid:'#0ea5e9',glow:'rgba(14,165,233,.45)',bg:'rgba(14,165,233,.09)',brd:'rgba(14,165,233,.2)',lbl:'Degraded'};
+}
+
+function drawGauge(ctx,cx,cy,r,v,C){
+  ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,0);ctx.lineWidth=4;ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineCap='round';ctx.stroke();
+  for(let i=0;i<=20;i++){
+    const a=Math.PI+(Math.PI*i/20),maj=i%5===0,r1=r-(maj?10:5),r2=r-2;
+    ctx.beginPath();ctx.moveTo(cx+r1*Math.cos(a),cy+r1*Math.sin(a));ctx.lineTo(cx+r2*Math.cos(a),cy+r2*Math.sin(a));
+    ctx.lineWidth=maj?1:.4;ctx.strokeStyle=maj?'rgba(255,255,255,.12)':'rgba(255,255,255,.04)';ctx.stroke();
+  }
+  if(v<=0)return;
+  const ea=Math.PI+Math.PI*v/100;
+  const g=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+  g.addColorStop(0,'#ff2d6b');g.addColorStop(.5,'#f59e0b');g.addColorStop(1,C.solid);
+  ctx.save();ctx.shadowColor=C.glow;ctx.shadowBlur=20;
+  ctx.beginPath();ctx.arc(cx,cy,r,Math.PI,ea);ctx.lineWidth=4;ctx.strokeStyle=g;ctx.lineCap='round';ctx.stroke();ctx.restore();
+  ctx.save();ctx.shadowColor=C.glow;ctx.shadowBlur=28;
+  ctx.beginPath();ctx.arc(cx+r*Math.cos(ea),cy+r*Math.sin(ea),4.5,0,Math.PI*2);ctx.fillStyle=C.solid;ctx.fill();ctx.restore();
+}
+
+function renderGauge(target,C){
+  const cv=$('gauge-canvas'),ctx=cv.getContext('2d'),cx=cv.width/2,cy=cv.height*.9,r=76;
+  const startVal=Math.max(5,target-Math.round(Math.random()*15+8)),p={v:startVal};
+  drawGauge(ctx,cx,cy,r,startVal,C);
+  anime({targets:p,v:target,duration:2400,easing:'easeOutExpo',update:()=>drawGauge(ctx,cx,cy,r,p.v,C)});
+}
+
+function countUpEl(el,target,suffix,dur){
+  if(!el)return;
+  const start=Math.max(1,Math.round(target*(0.80+Math.random()*.12))),p={n:start};
+  el.textContent=start+suffix;
+  anime({targets:p,n:target,duration:dur||1900,easing:'easeOutExpo',round:1,update:()=>el.textContent=p.n+suffix});
+}
+
+/* ── Navigation ── */
+function goBack(){
+  ['passport','error-box','loader'].forEach(hide);
+  show('search-screen','flex');
+  anime({targets:'#search-screen',opacity:[0,1],translateY:[8,0],duration:360,easing:'easeOutExpo'});
+  $('search-input').value='';
+  window.history.pushState({},'','/');
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  $('search-input').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){anime({targets:'#sp',scaleY:[1,.975,1],duration:260,easing:'easeInOutSine'});handleSearch();}
+  });
+  // entrance animation
+  anime({targets:'#wordmark',opacity:[0,1],translateY:[30,0],duration:900,easing:'easeOutExpo',delay:150});
+  anime({targets:'#sp-wrap',opacity:[0,1],translateY:[40,0],duration:900,easing:'easeOutExpo',delay:480});
+});
+
+function handleSearch(){
+  const val=$('search-input').value.trim();
+  const errEl=$('search-error');
+  if(!val){
+    errEl.style.display='block';
+    anime({targets:'#sp',translateX:[-8,8,-5,5,-2,2,0],duration:340,easing:'easeInOutSine'});
+    return;
+  }
+  errEl.style.display='none';
+  loadBattery(val);
+}
+
+/* ── Load & render (CODE1 logic) ── */
+async function loadBattery(batteryId){
+  ['search-screen','error-box','passport'].forEach(hide);
+  show('loader','flex');
+  anime({targets:'#loader',opacity:[0,1],translateY:[14,0],duration:360,easing:'easeOutExpo'});
+  const fill=$('ld-fill'),fp={w:0};
+  const fa=anime({targets:fp,w:90,duration:1800,easing:'easeOutCubic',update:()=>fill.style.width=fp.w+'%'});
+
+  try{
+    const{data,error}=await db.from('batteries').select('*').eq('battery_id',batteryId).single();
+    fa.pause();
+    await new Promise(res=>anime({targets:fp,w:100,duration:220,easing:'easeOutExpo',update:()=>fill.style.width=fp.w+'%',complete:res}));
+    await new Promise(r=>setTimeout(r,200));
+    hide('loader');
+    if(error||!data){
+      show('error-box','flex');
+      set('error-msg',`No record found for battery ID "${batteryId}". Please check and try again.`);
+      anime({targets:'#error-box',opacity:[0,1],translateY:[20,0],scale:[.97,1],duration:480,easing:'easeOutExpo'});
       return;
     }
-    errEl.style.display = 'none';
-    loadBattery(val);
+    renderPassport(data);
+  }catch(e){
+    fa.pause();hide('loader');
+    show('error-box','flex');
+    set('error-msg','Network error. Please check your connection and try again.');
+    anime({targets:'#error-box',opacity:[0,1],translateY:[20,0],duration:480,easing:'easeOutExpo'});
   }
+}
 
-  function getStatusStyle(soh) {
-    if (soh >= 85) return { color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.3)' };
-    if (soh >= 70) return { color: '#facc15', bg: 'rgba(250,204,21,0.1)', border: 'rgba(250,204,21,0.3)' };
-    return { color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.3)' };
-  }
+function renderPassport(d){
+  show('passport','block');
+  document.title=`Nexcell Passport — ${d.battery_id}`;
+  const C=getStatusStyle(d.average_soh);
 
-  function renderGauge(value, color) {
-    const canvas = document.getElementById('gauge-canvas');
-    const ctx = canvas.getContext('2d');
-    const cx = canvas.width / 2, cy = canvas.height * 0.78, r = 72;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, Math.PI, 0);
-    ctx.lineWidth = 14; ctx.strokeStyle = '#1e1e30'; ctx.lineCap = 'round'; ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, Math.PI, Math.PI + Math.PI * value / 100);
-    ctx.lineWidth = 14; ctx.strokeStyle = color; ctx.lineCap = 'round'; ctx.stroke();
-    ctx.shadowColor = color; ctx.shadowBlur = 12;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, Math.PI, Math.PI + Math.PI * value / 100);
-    ctx.lineWidth = 4; ctx.stroke();
-    ctx.shadowBlur = 0;
-  }
+  // Hero left
+  set('manufacturer',d.manufacturer_name||'—');
+  set('model',d.battery_model||'—');
+  set('status-text',d.status||C.lbl);
+  const pill=$('status-pill');
+  pill.style.cssText=`color:${C.solid};background:${C.bg};border:1px solid ${C.brd};display:inline-flex;align-items:center;gap:8px;border-radius:9px;padding:8px 18px;font-size:11px;font-weight:600;letter-spacing:.06em`;
 
-  function setText(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  }
+  // Hero stats strip (CODE1 fields)
+  set('s-bat',d.batch_id||'—');
+  set('s-loc',d.manufacture_place||'—');
+  set('s-imp',d.battery_impedance!=null?d.battery_impedance+' Ω':'—');
+  set('s-tmp',d.ambient_temperature!=null?d.ambient_temperature+' °C':'—');
 
-  async function loadBattery(batteryId) {
-    hide('search-screen');
-    hide('error-box');
-    hide('passport');
-    show('loader', 'flex');
+  // Traceability
+  set('serial-number',d.serial_number||'—');
+  set('batch-id',d.batch_id||'—');
+  set('weight',d.weight_kg!=null?d.weight_kg+' kg':'—');
+  set('manufacture-date',d.manufacture_date||'—');
+  set('manufacture-place',d.manufacture_place||'—');
+  set('tested-at',d.created_at?new Date(d.created_at).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}):'—');
 
-    try {
-      const { data, error } = await db
-        .from('batteries').select('*')
-        .eq('battery_id', batteryId).single();
+  // EIS static fields
+  set('current-ratio',d.current_ratio!=null?d.current_ratio:'—');
 
-      hide('loader');
-      if (error || !data) {
-        show('error-box', 'flex');
-        setText('error-msg', `No record found for battery ID "${batteryId}". Please check and try again.`);
-        return;
-      }
-      renderPassport(data);
-    } catch (e) {
-      hide('loader');
-      show('error-box', 'flex');
-      setText('error-msg', 'Network error. Please check your connection and try again.');
-    }
-  }
+  /* ─ Animated entrance ─ */
+  const tl=anime.timeline({easing:'easeOutExpo'});
+  tl.add({targets:'#topbar',opacity:[0,1],translateY:[-12,0],duration:360},0);
+  tl.add({targets:'#hero',opacity:[0,1],translateY:[40,0],duration:640},80);
+  tl.add({targets:'#h-eyebrow',opacity:[0,1],translateX:[-14,0],duration:340},260);
+  tl.add({targets:'#battery-id',opacity:[0,1],translateY:[12,0],duration:400,begin:()=>set('battery-id',d.battery_id)},340);
+  tl.add({targets:'#h-chips',opacity:[0,1],translateY:[8,0],duration:300},480);
+  tl.add({targets:'#status-pill',opacity:[0,1],scale:[.88,1],duration:300},520);
+  tl.add({targets:'#hero-r',opacity:[0,1],translateX:[24,0],duration:440,complete:()=>{
+    const gv=$('soh-value');
+    gv.innerHTML=d.average_soh+'<span class="soh-pct">%</span>';
+    gv.style.textShadow=`0 0 50px ${C.glow},0 0 100px ${C.glow}`;
+    renderGauge(d.average_soh,C);
+  }},580);
+  tl.add({targets:['#hs0','#hs1','#hs2','#hs3'],opacity:[0,1],translateY:[10,0],duration:320,delay:anime.stagger(45)},740);
+  tl.add({targets:'#sec-lbl-0,#sec-lbl-1',opacity:[0,1],duration:300},940);
+  tl.add({targets:['#c0','#c1','#c2'],opacity:[0,1],translateY:[28,0],duration:540,delay:anime.stagger(70)},1000);
+  tl.add({targets:'.data-row',opacity:[0,1],translateX:[-10,0],duration:300,delay:anime.stagger(18)},1060);
+  tl.add({targets:'.imp-tile',opacity:[0,1],scale:[.91,1],duration:360,delay:anime.stagger(55)},1300);
+  tl.add({targets:'#footer',opacity:[0,1],translateY:[10,0],duration:360},1540);
 
-  function renderPassport(d) {
-    show('passport', 'block');
-    document.title = `Nexcell Passport — ${d.battery_id}`;
-    const s = getStatusStyle(d.average_soh);
+  /* SOH bars + counters */
+  setTimeout(()=>{
+    const rv=d.soh_re||0,rcv=d.soh_rct||0;
+    const sRe=Math.max(0,rv-Math.round(Math.random()*12+5));
+    const sRct=Math.max(0,rcv-Math.round(Math.random()*12+5));
+    $('soh-re').textContent=sRe+'%';$('soh-rct').textContent=sRct+'%';
+    const pRe={n:sRe},pRct={n:sRct};
+    anime({targets:pRe,n:rv,duration:1700,easing:'easeOutExpo',round:1,update:()=>$('soh-re').textContent=pRe.n+'%'});
+    anime({targets:pRct,n:rcv,duration:1700,easing:'easeOutExpo',round:1,delay:150,update:()=>$('soh-rct').textContent=pRct.n+'%'});
+    anime({targets:'#bar-re',width:[sRe+'%',rv+'%'],duration:1700,easing:'easeOutExpo'});
+    anime({targets:'#bar-rct',width:[sRct+'%',rcv+'%'],duration:1700,easing:'easeOutExpo',delay:150});
+  },1240);
 
-    setText('battery-id', d.battery_id);
-    setText('manufacturer', d.manufacturer_name || '—');
-    setText('model', d.battery_model || '—');
+  /* EIS numeric fields */
+  setTimeout(()=>{
+    if(d.predicted_re!=null)   countUpEl($('predicted-re'),+d.predicted_re,' Ω',1500);
+    if(d.predicted_rct!=null)  countUpEl($('predicted-rct'),+d.predicted_rct,' Ω',1500);
+    if(d.ambient_temperature!=null){countUpEl($('ambient-temp'),+d.ambient_temperature,' °C',1200);countUpEl($('s-tmp'),+d.ambient_temperature,' °C',1200);}
+    if(d.sense_current!=null)   countUpEl($('sense-current'),+d.sense_current,' A',1200);
+    if(d.battery_current!=null) countUpEl($('battery-current'),+d.battery_current,' A',1200);
+    if(d.battery_impedance!=null){countUpEl($('battery-impedance'),+d.battery_impedance,' Ω',1500);countUpEl($('s-imp'),+d.battery_impedance,' Ω',1500);}
+    if(d.rectified_impedance!=null) countUpEl($('rectified-impedance'),+d.rectified_impedance,' Ω',1500);
+  },1060);
+}
 
-    const badge = document.getElementById('status-badge');
-    badge.textContent = d.status || '—';
-    badge.style.color = s.color;
-    badge.style.background = s.bg;
-    badge.style.borderColor = s.border;
-
-    renderGauge(d.average_soh, s.color);
-    document.getElementById('soh-value').style.color = s.color;
-    setText('soh-value', d.average_soh + '%');
-    setText('soh-re',  d.soh_re  + '%');
-    setText('soh-rct', d.soh_rct + '%');
-
-    setTimeout(() => {
-      document.getElementById('bar-re').style.width  = d.soh_re  + '%';
-      document.getElementById('bar-rct').style.width = d.soh_rct + '%';
-    }, 100);
-
-    setText('predicted-re',  d.predicted_re  != null ? d.predicted_re  + ' Ω' : '—');
-    setText('predicted-rct', d.predicted_rct != null ? d.predicted_rct + ' Ω' : '—');
-    setText('ambient-temp',         d.ambient_temperature != null ? d.ambient_temperature + ' °C' : '—');
-    setText('sense-current',        d.sense_current        != null ? d.sense_current        + ' A'  : '—');
-    setText('battery-current',      d.battery_current      != null ? d.battery_current      + ' A'  : '—');
-    setText('current-ratio',        d.current_ratio        != null ? d.current_ratio               : '—');
-    setText('battery-impedance',    d.battery_impedance    != null ? d.battery_impedance    + ' Ω' : '—');
-    setText('rectified-impedance',  d.rectified_impedance  != null ? d.rectified_impedance  + ' Ω' : '—');
-    setText('serial-number',     d.serial_number     || '—');
-    setText('batch-id',          d.batch_id          || '—');
-    setText('weight',            d.weight_kg         != null ? d.weight_kg + ' kg' : '—');
-    setText('manufacture-date',  d.manufacture_date  || '—');
-    setText('manufacture-place', d.manufacture_place || '—');
-    setText('tested-at', d.created_at ? new Date(d.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—');
-  }
-
-  const pathParts = window.location.pathname.split('/').filter(Boolean);
-  if (pathParts.length >= 2 && pathParts[0] === 'battery') {
-    loadBattery(pathParts[1]);
-  }
+/* Deep-link support (CODE1) */
+const pathParts=window.location.pathname.split('/').filter(Boolean);
+if(pathParts.length>=2&&pathParts[0]==='battery'){loadBattery(pathParts[1]);}
 </script>
 </body>
 </html>
